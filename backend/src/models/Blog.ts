@@ -5,6 +5,7 @@ export interface IBlog extends Document {
     content: string;
     image?: string;
     tags: string[];
+    slug: string;
     category: mongoose.Types.ObjectId;
     author: mongoose.Types.ObjectId;
     status: 'published' | 'draft';
@@ -18,6 +19,7 @@ const BlogSchema: Schema = new Schema(
         title: { type: String, required: true },
         content: { type: String, required: true },
         image: { type: String },
+        slug: { type: String, unique: true },
         tags: [{ type: String }],
         category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
         author: { type: Schema.Types.ObjectId, ref: 'User', required: true },

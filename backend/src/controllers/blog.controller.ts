@@ -60,8 +60,19 @@ export const createBlog = async (req: AuthRequest, res: Response) => {
     try {
         const { title, content, image, tags, category, status } = req.body;
 
+        // Generate slug from title
+        const slugify = require('slugify');
+        let slug = slugify(title, { lower: true, strict: true });
+
+        // Check if slug already exists and append random string if so
+        let slugExists = await Blog.findOne({ slug });
+        if (slugExists) {
+            slug = `${slug}-${Date.now()}`;
+        }
+
         const blog = new Blog({
             title,
+            slug,
             content,
             image,
             tags,
