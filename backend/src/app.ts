@@ -16,7 +16,7 @@ app.use(cookieParser());
 
 // CORS configuration - Allow frontend
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://blog-space-nine-zeta.vercel.app'],
     credentials: true,
 }));
 
