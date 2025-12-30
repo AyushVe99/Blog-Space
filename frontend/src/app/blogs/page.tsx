@@ -18,6 +18,7 @@ function BlogsContent() {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [search, setSearch] = useState(searchParams.get('search') || '');
+    const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
     const [category, setCategory] = useState(searchParams.get('category') || '');
     const [categories, setCategories] = useState<any[]>([]);
 
@@ -33,12 +34,34 @@ function BlogsContent() {
         fetchCategories();
     }, []);
 
+    // Sync state with URL parameters
+    useEffect(() => {
+        const searchValue = searchParams.get('search') || '';
+        setSearch(searchValue);
+        setSearchInput(searchValue);
+        setCategory(searchParams.get('category') || '');
+    }, [searchParams]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchInput !== search) {
+                setPage(1);
+                const params = new URLSearchParams(searchParams.toString());
+                if (searchInput) params.set('search', searchInput);
+                else params.delete('search');
+                router.push(`/blogs?${params.toString()}`);
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchInput, router, searchParams, search]);
+
     useEffect(() => {
         const fetchBlogs = async () => {
             setLoading(true);
             try {
                 const queryParams = new URLSearchParams();
-                if (search) queryParams.append('search', search);
+                if (search) queryParams.append('keyword', search);
                 if (category) queryParams.append('category', category);
                 queryParams.append('page', page.toString());
                 queryParams.append('limit', '9');
@@ -58,9 +81,10 @@ function BlogsContent() {
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
+        // Trigger immediate search by updating URL
         setPage(1);
-        const params = new URLSearchParams(searchParams);
-        if (search) params.set('search', search);
+        const params = new URLSearchParams(searchParams.toString());
+        if (searchInput) params.set('search', searchInput);
         else params.delete('search');
         router.push(`/blogs?${params.toString()}`);
     };
@@ -81,8 +105,8 @@ function BlogsContent() {
                 <form onSubmit={handleSearch} className="flex gap-2">
                     <Input
                         placeholder="Search blogs..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
                         icon={<Search className="h-4 w-4" />}
                         className="w-full md:w-64"
                     />
